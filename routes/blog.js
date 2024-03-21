@@ -70,6 +70,32 @@ router.get('/getBlog/:id', async (req, res) => {
   }
 })
 
+// API to like a paricular blog;
+router.put('/like/:id', authMiddleware, async (req, res) => {
+  const { id } = req.userDetail
+  const blogId = req.params.id
+
+  try {
+    let blog = await Blog.findById(blogId)
+    if (!blog) {
+      return res.status(404).json({ success: false, message: 'Blog not found' })
+    }
+    const alreadyLiked = blog.likes.includes(id)
+    if (alreadyLiked) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'You already liked this blog' })
+    }
+    blog.likes.push(id)
+    await blog.save()
+    return res
+      .status(200)
+      .json({ success: true, message: 'Liked Successfully' })
+  } catch (error) {
+    return res.status(500).json({ success: success, message: error.message })
+  }
+})
+
 // API to get blogs of any ;
 router.get('/getUserBlogs/:id', async (req, res) => {
   let success = false
